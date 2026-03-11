@@ -11,7 +11,8 @@ YELP_SEARCH_URL = "https://api.yelp.com/v3/businesses/search"
 YELP_REVIEWS_URL = "https://api.yelp.com/v3/businesses/{id}/reviews"
 
 
-key = "YDNundaUGsFjeUktTPSOXmGp0PNDrb8g_ZFLYC-CaCbaN6V9_QDPJO7ZtnztUUimRWXv7fy3kmEuNDf2CVU3O73t5Ml4F81Xz7NryeDlS8rs0V03KS0pUD2zyTCmaXYx"
+
+key = os.getenv("YELP_API_KEY")
 cities = ["Seattle, WA", "San Francisco, CA", "Portland, OR"]
 
 # per city, since you have limit of 400 calls
@@ -97,7 +98,23 @@ def fetch_all():
                 reviews = []
                 print(f"No reviews available for business ID {business_id}, skipping fetch_reviews.")
 
-            print(f"Storing data for business ID {business_id} with {len(reviews)} reviews")
+            all_businesses.append({
+                 "business_id": business["id"],
+                 "business_name": business["name"],
+                 "review_count": business.get("review_count"),
+                 "cuisine": business["categories"][0]["title"] if business.get("categories") else None,
+                 "city": business["location"].get("city"),
+                 "state": business["location"].get("state")
+            })
+            # If reviews exist, store them too
+        for review in reviews:
+            all_businesses.append({
+            "review_id": review["id"],
+            "business_id": business["id"],
+            "business_name": business["name"],
+            "review_rating": review.get("rating"),
+            "review_text": review.get("text")
+        })
 
             for review in reviews:
                 all_businesses.append({
@@ -131,38 +148,3 @@ def fetch_all():
             time.sleep(0.5)
 
     return all_businesses
-
-if __name__ == "__main__":
-    # TESTING ONLY
-    test_cities = ["Portland, OR"]
-    test_business_limit = 2
-    test_review_limit = 1
-
-    all_businesses = []
-
-    for city in test_cities:
-        print(f"Testing city: {city}")
-        businesses = search_businesses(city)[:test_business_limit]
-
-        for business in businesses:
-            business_id = business["id"]
-
-            if business.get("review_count", 0) > 0:
-                reviews = fetch_reviews(business_id)[:test_review_limit]
-            else:
-                reviews = []
-                print(f"No reviews available for business {business['name']}")
-
-            for review in reviews:
-                all_businesses.append({
-                    "review_id": review["id"],
-                    "business_id": business["id"],
-                    "business_name": business["name"],
-                    "review_rating": review.get("rating"),
-                    "review_text": review.get("text")
-                })
-
-            print(f"Stored {len(reviews)} reviews for {business['name']}")
-
-    print(f"\nTest complete! Total businesses processed: {len(all_businesses)}")
-    print(all_businesses)

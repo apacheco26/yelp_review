@@ -13,6 +13,12 @@ YELP_REVIEWS_URL = "https://api.yelp.com/v3/businesses/{id}/reviews"
 
 
 key = os.getenv("YELP_API_KEY")
+
+# check if the API key is found in the environment variable and print a message accordingly.
+print("API KEY FOUND:", key is not None)
+if not key:
+    raise ValueError("YELP_API_KEY not found in environment variables")
+
 cities = ["Seattle, WA", "San Francisco, CA", "Portland, OR"]
 
 # per city, since you have limit of 400 calls
@@ -98,23 +104,6 @@ def fetch_all():
                 reviews = []
                 print(f"No reviews available for business ID {business_id}, skipping fetch_reviews.")
 
-            all_businesses.append({
-                 "business_id": business["id"],
-                 "business_name": business["name"],
-                 "review_count": business.get("review_count"),
-                 "cuisine": business["categories"][0]["title"] if business.get("categories") else None,
-                 "city": business["location"].get("city"),
-                 "state": business["location"].get("state")
-            })
-            # If reviews exist, store them too
-        for review in reviews:
-            all_businesses.append({
-            "review_id": review["id"],
-            "business_id": business["id"],
-            "business_name": business["name"],
-            "review_rating": review.get("rating"),
-            "review_text": review.get("text")
-        })
 
             for review in reviews:
                 all_businesses.append({

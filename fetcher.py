@@ -10,6 +10,8 @@ import time
 YELP_SEARCH_URL = "https://api.yelp.com/v3/businesses/search"
 YELP_REVIEWS_URL = "https://api.yelp.com/v3/businesses/{id}/reviews"
 
+
+key = "YDNundaUGsFjeUktTPSOXmGp0PNDrb8g_ZFLYC-CaCbaN6V9_QDPJO7ZtnztUUimRWXv7fy3kmEuNDf2CVU3O73t5Ml4F81Xz7NryeDlS8rs0V03KS0pUD2zyTCmaXYx"
 cities = ["Seattle, WA", "San Francisco, CA", "Portland, OR"]
 
 # per city, since you have limit of 400 calls
@@ -18,7 +20,7 @@ search_limit = 50
 
 def search_businesses(city):
     
-    headers = {"Authorization": f"Bearer {os.environ.get('YELP_API_KEY')}"}
+    headers = {"Authorization": f"Bearer {key}"}
 
     # url reequest combining all the parameters
     params = {
@@ -53,7 +55,7 @@ def search_businesses(city):
 
 # this function will fetch the reviews for a given business ID.
 def fetch_reviews(business_id):
-    headers = {"Authorization": f"Bearer {os.environ.get('YELP_API_KEY')}"}
+    headers = {"Authorization": f"Bearer {key}"}
 
     # format the reviews URL with the business ID
     url = YELP_REVIEWS_URL.format(id=business_id)
@@ -120,4 +122,4 @@ def fetch_all():
                 })
             # delay between API calls
             time.sleep(0.5)
-    return all_businesses
+

@@ -1,0 +1,11 @@
+# HTTP requests to Yelp API
+requests
+
+# database connection
+sqlalchemy
+
+# PostgreSQL driver
+psycopg2-binary
+
+# loads .env file for local development
+python-dotenv

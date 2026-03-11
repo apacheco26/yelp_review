@@ -43,7 +43,8 @@ def search_businesses(city):
         # connection will timeout so if so get the error message and print it out
         print(f"Error fetching businesses for {city}: {response.text}")
         return []
-    
+
+
     # parse the JSON response to extract the list of businesses. 
     # The .get() method is used to safely access the "businesses" key, 
     # providing an empty list as a default value if the key is not present in the response.
@@ -89,11 +90,16 @@ def fetch_all():
         for business in businesses:
             business_id = business["id"]
             # fetch the reviews for the current business ID by calling the fetch_reviews function
-            reviews = fetch_reviews(business_id)
+        # Only fetch reviews if the business has reviews
+            if business.get("review_count", 0) > 0:
+                reviews = fetch_reviews(business_id)
+            else:
+                reviews = []
+                print(f"No reviews available for business ID {business_id}, skipping fetch_reviews.")
+
             print(f"Storing data for business ID {business_id} with {len(reviews)} reviews")
 
             for review in reviews:
-                # create a dictionary to store the business and review data together
                 all_businesses.append({
                     "review_id": review["id"],
                     "business_id": business["id"],
@@ -120,6 +126,43 @@ def fetch_all():
                     "time_created": review.get("time_created"),
                     "url": review.get("url")
                 })
+
             # delay between API calls
             time.sleep(0.5)
 
+    return all_businesses
+
+if __name__ == "__main__":
+    # TESTING ONLY
+    test_cities = ["Portland, OR"]
+    test_business_limit = 2
+    test_review_limit = 1
+
+    all_businesses = []
+
+    for city in test_cities:
+        print(f"Testing city: {city}")
+        businesses = search_businesses(city)[:test_business_limit]
+
+        for business in businesses:
+            business_id = business["id"]
+
+            if business.get("review_count", 0) > 0:
+                reviews = fetch_reviews(business_id)[:test_review_limit]
+            else:
+                reviews = []
+                print(f"No reviews available for business {business['name']}")
+
+            for review in reviews:
+                all_businesses.append({
+                    "review_id": review["id"],
+                    "business_id": business["id"],
+                    "business_name": business["name"],
+                    "review_rating": review.get("rating"),
+                    "review_text": review.get("text")
+                })
+
+            print(f"Stored {len(reviews)} reviews for {business['name']}")
+
+    print(f"\nTest complete! Total businesses processed: {len(all_businesses)}")
+    print(all_businesses)

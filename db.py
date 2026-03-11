@@ -27,7 +27,7 @@ except Exception as e:
 
 def create_table():
     """Creates the yelp_reviews table if it doesn't already exist."""
-    with engine.connect() as conn:
+    with engine.begin() as conn:
         conn.execute(text("""CREATE TABLE IF NOT EXISTS yelp_reviews (
                id SERIAL PRIMARY KEY,
                review_id VARCHAR UNIQUE,
@@ -58,7 +58,6 @@ def create_table():
                           )"""
                           ))
         #save the changes to the database
-        conn.commit()
         print("Table 'yelp_reviews' is ready.")
     
 

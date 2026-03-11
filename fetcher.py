@@ -7,8 +7,6 @@ import time
 
 # key will be saved in a seperate file
 # best to keep sensitive information like API keys in a .
-YELP_API_KEY = os.environ["YELP_API_KEY"] 
-YELP_HEADERS = {"Authorization": f"Bearer {YELP_API_KEY}"}
 YELP_SEARCH_URL = "https://api.yelp.com/v3/businesses/search"
 YELP_REVIEWS_URL = "https://api.yelp.com/v3/businesses/{id}/reviews"
 
@@ -19,6 +17,9 @@ search_limit = 50
 
 
 def search_businesses(city):
+    
+    headers = {"Authorization": f"Bearer {os.environ.get('YELP_API_KEY')}"}
+
     # url reequest combining all the parameters
     params = {
         "location": city,
@@ -29,7 +30,7 @@ def search_businesses(city):
     # send the request to the Yelp API with the specified parameters and headers
     # importnat functions here requests.get() 
     # to make the GET request to the API, passing in the URL, headers, and parameters
-    response = requests.get(YELP_SEARCH_URL, headers=YELP_HEADERS, params=params)
+    response = requests.get(YELP_SEARCH_URL, headers=headers, params=params)
 
     # its alaways good to check the status code with a print statement.
     print(f"Searching businesses in {city} — Status: {response.status_code}")
@@ -52,11 +53,13 @@ def search_businesses(city):
 
 # this function will fetch the reviews for a given business ID.
 def fetch_reviews(business_id):
+    headers = {"Authorization": f"Bearer {os.environ.get('YELP_API_KEY')}"}
+
     # format the reviews URL with the business ID
     url = YELP_REVIEWS_URL.format(id=business_id)
     
     # send the request to the Yelp API to fetch reviews for the specified business ID
-    response = requests.get(url, headers=YELP_HEADERS)
+    response = requests.get(url, headers=headers)
 
     print(f"Fetching reviews for business ID {business_id} — Status: {response.status_code}")
     print(f"Rate limit remaining: {response.headers.get('RateLimit-Remaining', 'N/A')}")

@@ -2,10 +2,15 @@ from fetcher import fetch_all
 from db import create_table, save_reviews
 from dotenv import load_dotenv
 load_dotenv()
-import os, sys
+import os
+import requests
 
-print("Starting main.py")
-print("API key present?", os.getenv("YELP_API_KEY") is not None, file=sys.stderr)
+# test review endpoint with a known business
+test_url = "https://api.yelp.com/v3/businesses/gary-danko-san-francisco/reviews"
+headers = {"Authorization": f"Bearer {os.environ.get('YELP_API_KEY')}"}
+response = requests.get(test_url, headers=headers)
+print(f"Test review fetch status: {response.status_code}")
+print(f"Test response: {response.text}")
 
 def main():
     print("Starting data fetching process...")

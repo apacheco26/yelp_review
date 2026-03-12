@@ -1,5 +1,5 @@
-
 from sqlalchemy import create_engine, text
+from sqlalchemy.orm import sessionmaker
 import os
 
 # sends the data fetched from api to Railway Postgres
@@ -7,6 +7,9 @@ import os
 # and saving data to it.
 engine = create_engine(os.environ["DATABASE_URL"])
 
+# creates a session factory bound to our engine
+# each session is a unit of work with the database
+Session = sessionmaker(bind=engine)
 
 # test connection with Postgres(the db)
 try:
@@ -17,9 +20,8 @@ try:
     with engine.connect() as conn:
         # execute a simple query to test the connection
         # return the numner 1
-
         conn.execute(text("SELECT 1"))
-        # if the query executes successfully. 
+    # if the query executes successfully.
     print("Database connected successful.")
 # if there is an error during the connection or query execution
 except Exception as e:
@@ -59,7 +61,6 @@ def create_table():
                           ))
         #save the changes to the database
         print("Table 'yelp_reviews' is ready.")
-    
 
 def save_reviews(reviews: list):
     if not reviews:
@@ -71,10 +72,15 @@ def save_reviews(reviews: list):
     saved = 0
     skipped = 0
 
-    with engine.connect() as conn:
+    # create a session instead of engine.begin()
+    # this allows us to rollback individual failed inserts
+    # without breaking the entire transaction
+    session = Session()
+
+    try:
         for review in reviews:
             try:
-                conn.execute(text("""
+                session.execute(text("""
                     INSERT INTO yelp_reviews (
                         review_id, business_id, business_name,
                         cuisine, all_categories, price, transactions,
@@ -91,11 +97,18 @@ def save_reviews(reviews: list):
                         :review_count, :time_created, :url
                     ) ON CONFLICT (review_id) DO NOTHING
                 """), review)
+                # commit after each successful insert
+                session.commit()
                 saved += 1
             except Exception as e:
-                print(f"Failed to save review {review['review_id']}: {e}")
+                # rollback the failed insert so the session can continue
+                # without this, one failure breaks all subsequent inserts
+                session.rollback()
+                print(f"Failed to save review {review.get('review_id')}: {e}")
                 skipped += 1
+    finally:
+        # always close the session to prevent connection leaks
+        session.close()
 
-        # commit the transaction after processing all reviews
-        conn.commit()
-        print(f"Saved {saved} reviews. Skipped {skipped} reviews due to errors.")
+    # commit the transaction after processing all reviews
+    print(f"Saved {saved} reviews. Skipped {skipped} reviews due to errors.")

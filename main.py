@@ -1,7 +1,7 @@
 from fetcher import fetch_all
 from db import create_table, save_reviews
 from dotenv import load_dotenv
-load_dotenv()
+import sys
 import os
 import requests
 

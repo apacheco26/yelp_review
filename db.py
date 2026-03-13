@@ -8,7 +8,7 @@ import os
 engine = create_engine(os.environ["DATABASE_URL"])
 
 # creates a session factory bound to our engine
-# each session is a unit of work with the database
+# each session creates a link to the database
 Session = sessionmaker(bind=engine)
 
 # test connection with Postgres(the db)
@@ -19,14 +19,16 @@ try:
     # also, rename to conn to be more descriptive.
     with engine.connect() as conn:
         # execute a simple query to test the connection
-        # return the numner 1
+        # return the number 1
         conn.execute(text("SELECT 1"))
     # if the query executes successfully.
     print("Database connected successful.")
 # if there is an error during the connection or query execution
+# provide the error with e and print a message to the console
 except Exception as e:
     print(f"Database connection failed; {e}")
 
+# we will be provideing the code in here for sql to create code
 def create_table():
     """Creates the yelp_reviews table if it doesn't already exist."""
     with engine.begin() as conn:
@@ -72,7 +74,6 @@ def save_reviews(reviews: list):
     saved = 0
     skipped = 0
 
-    # create a session instead of engine.begin()
     # this allows us to rollback individual failed inserts
     # without breaking the entire transaction
     session = Session()
@@ -110,5 +111,5 @@ def save_reviews(reviews: list):
         # always close the session to prevent connection leaks
         session.close()
 
-    # commit the transaction after processing all reviews
+    # print summary of results after processing all reviews
     print(f"Saved {saved} reviews. Skipped {skipped} reviews due to errors.")

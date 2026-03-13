@@ -3,7 +3,10 @@ from db import create_table, save_reviews
 from dotenv import load_dotenv
 import sys
 import os
-import requests
+
+# load environment variables from .env file for local development
+# note: in production, environment variables are set directly in Railway's Variables dashboard
+load_dotenv()
 
 def main():
     print("Starting data fetching process...")
@@ -32,10 +35,10 @@ def main():
     print("Job completed successfully!")
 
 
-# means that this code will only run if this file is executed directly, 
-# and not when it is imported as a module in another file.
+# in other file when "python main.py" will set __name__ to "__main__"
+# starting the job. so if true, then it will run main() function.
 if __name__ == "__main__":
     main()
 
-# Other wordsif someone ever imports something from main.py into another file, 
+# IN Other words, if someone ever imports something from main.py into another file, 
 # it won't accidentally trigger the entire fetch job just from being imported.

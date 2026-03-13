@@ -6,11 +6,9 @@ import time
 # os reads the yelp API key from the environment variable
 
 # key will be saved in a seperate file
-# best to keep sensitive information like API keys in a .
+# best to keep sensitive information like API keys in a .env file
 YELP_SEARCH_URL = "https://api.yelp.com/v3/businesses/search"
 YELP_REVIEWS_URL = "https://api.yelp.com/v3/businesses/{id}/reviews"
-
-
 
 key = os.getenv("YELP_API_KEY")
 
@@ -67,6 +65,7 @@ def fetch_reviews(business_id):
 
     # format the reviews URL with the business ID
     url = YELP_REVIEWS_URL.format(id=business_id)
+    
     
     # send the request to the Yelp API to fetch reviews for the specified business ID
     response = requests.get(url, headers=headers)
